@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DBR Calculator – UAE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --blue:#0a3cff;
+  --blue-dark:#002fa7;
+  --blue-soft:#eef3ff;
+  --white:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --green:#16a34a;
+  --red:#dc2626;
+  --orange:#f59e0b;
+}
+
+*{box-sizing:border-box;font-family:Segoe UI,Roboto,Arial,sans-serif;}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(180deg,var(--blue-soft),#fff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+
+.container{
+  width:100%;
+  max-width:560px;
+  background:#fff;
+  border-radius:18px;
+  padding:30px;
+  box-shadow:0 25px 60px rgba(0,0,0,.12);
+}
+
+h1{
+  text-align:center;
+  color:var(--blue-dark);
+  margin-bottom:24px;
+}
+
+.section{margin-bottom:22px;}
+
+.label{
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+input{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid #dbe2ff;
+  font-size:15px;
+}
+
+input:focus{border-color:var(--blue);outline:none;}
+
+.list{display:flex;flex-direction:column;gap:10px;}
+
+.add-btn{
+  margin-top:8px;
+  background:var(--blue-soft);
+  border:none;
+  padding:10px;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.calc-btn{
+  width:100%;
+  background:linear-gradient(135deg,var(--blue),var(--blue-dark));
+  color:#fff;
+  border:none;
+  padding:14px;
+  font-size:16px;
+  border-radius:14px;
+  cursor:pointer;
+}
+
+.warning{
+  margin-top:12px;
+  padding:12px;
+  border-radius:10px;
+  background:#fff7ed;
+  color:var(--orange);
+  font-weight:600;
+  display:none;
+}
+
+.bank-box{
+  margin-top:20px;
+  padding:18px;
+  border-radius:16px;
+  background:var(--blue-soft);
+  display:none;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.badge{
+  margin-top:14px;
+  padding:12px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:800;
+}
+
+.green{background:#dcfce7;color:var(--green);}
+.red{background:#fee2e2;color:var(--red);}
+.orange{background:#fff7ed;color:var(--orange);}
+
+footer{
+  margin-top:22px;
+  text-align:center;
+  font-size:13px;
+  color:var(--muted);
+}
+
+footer a{
+  color:var(--blue);
+  font-weight:600;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>DBR Calculator</h1>
+
+<div class="section">
+  <div class="label">Monthly Salary (AED)</div>
+  <input type="number" id="salary" placeholder="Enter salary">
+</div>
+
+<div class="section">
+  <div class="label">Credit Card Limits</div>
+  <div id="cards" class="list">
+    <input type="number" placeholder="Card limit">
+  </div>
+  <button class="add-btn" onclick="addField('cards')">+ Add card</button>
+</div>
+
+<div class="section">
+  <div class="label">Monthly Loan EMIs</div>
+  <div id="emis" class="list">
+    <input type="number" placeholder="Monthly EMI">
+  </div>
+  <button class="add-btn" onclick="addField('emis')">+ Add EMI</button>
+</div>
+
+<button class="calc-btn" onclick="calculate()">Check DBR</button>
+
+<div id="warning" class="warning"></div>
+
+<div id="bankBox" class="bank-box">
+  <div class="row"><span>Allowed Limit (50%)</span><span id="allowed"></span></div>
+  <div class="row"><span>Used Limit</span><span id="used"></span></div>
+  <div class="row"><span>DBR %</span><span id="dbr"></span></div>
+  <div id="status" class="badge"></div>
+</div>
+
+<footer>
+Powered by
+<a href="https://paisabazaaruae.github.io/Paisabazaar-/UAE.html" target="_blank">
+Akshay S L
+</a>
+</footer>
+
+</div>
+
+<script>
+function addField(id){
+  const box=document.getElementById(id);
+  if(box.children.length>=10) return;
+  const i=document.createElement("input");
+  i.type="number";
+  i.placeholder=id==="cards"?"Card limit":"Monthly EMI";
+  box.appendChild(i);
+}
+
+function sum(id){
+  let t=0;
+  document.querySelectorAll("#"+id+" input").forEach(i=>{
+    t+=Number(i.value)||0;
+  });
+  return t;
+}
+
+function calculate(){
+  const salary=Number(document.getElementById("salary").value);
+  const cards=sum("cards");
+  const emis=sum("emis");
+
+  const warning=document.getElementById("warning");
+  warning.style.display="none";
+
+  if(!salary || salary<=0){
+    warning.style.display="block";
+    warning.innerText="Please enter a valid monthly salary.";
+    return;
+  }
+
+  const allowed=salary/2;
+  const used=(cards*0.05)+emis;
+  const dbrPercent=((used/salary)*100).toFixed(1);
+
+  document.getElementById("bankBox").style.display="block";
+  document.getElementById("allowed").innerText="AED "+allowed.toFixed(2);
+  document.getElementById("used").innerText="AED "+used.toFixed(2);
+  document.getElementById("dbr").innerText=dbrPercent+" %";
+
+  const status=document.getElementById("status");
+  status.className="badge";
+
+  const diff=allowed-used;
+
+  if(used>allowed){
+    status.classList.add("red");
+    status.innerText="High DBR – Not Eligible";
+  }else if(diff<=200){
+    status.classList.add("orange");
+    status.innerText="Borderline – Limited Eligibility";
+  }else{
+    status.classList.add("green");
+    status.innerText="Eligible for New Credit";
+  }
+}
+</script>
+
+</body>
+</html>
